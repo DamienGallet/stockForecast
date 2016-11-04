@@ -1,4 +1,5 @@
 import dataLoader as xdl
+import interface as xit
 from datetime import timedelta
 from datetime import datetime
 import pandas as pd
@@ -6,33 +7,28 @@ import pandas as pd
 
 companies = ["IBM"]
 
+def grade(preds, prices, grades, i):
 
+    currentPred = preds.loc[i]
 
-def grade(prediction, prices,date_max):
+    value, date = getRealPrice(currentPred,prices)
+    if value == -1:
+        return -1, 0
 
-    stockValue = -1
-    init_hor = prediction['HORIZON'].item()
-    horizon = prediction['HORIZON'].item()
-    if prediction['ACTDATS_ACTTIMS'] + timedelta(days=horizon*30-31) > date_max:
-        return -1
+    pred = currentPred['VALUE']
+    grade = absoluteGradeFun(pred, value)
+    return grade, date
 
-    while stockValue == -1 and horizon - init_hor < 2*init_hor:
-        priceLine = getPriceFromHorizon(prediction['ACTDATS_ACTTIMS'], horizon, prices)
+def getRealPrice(pred,prices):
 
-
-        forecastValue = prediction['VALUE'].item()
-        if len(priceLine)==0:
-            stockValue = -1
-            horizon += 1
-        else:
-            stockValue = priceLine.head(1)['PRC'].item()
-
-    if stockValue == -1:
-        return -1
-
-    grade = absoluteGradeFun(forecastValue, stockValue)
-    print(grade)
-    return grade
+    horizon = pred['HORIZON']
+    crtMnth = pred['MONTH']
+    price = -1
+    line = prices.loc[crtMnth+horizon:crtMnth+horizon+3]
+    if(len(line) == 0):
+        return -1, 0
+    goodLine = line.head(1)
+    return goodLine['PRC'].item(), goodLine.index.item()
 
 
 def absoluteGradeFun(forecastValue, finalPrice):
@@ -57,19 +53,20 @@ if __name__ == "__main__":
         prices = xdl.loadStockPrice(company)
         grades = pd.DataFrame(columns=['COMPANY','MONTH','PREDNO','ESTIMID','ALYSNAM','GRADE'])
 
-        #print(prices.between_time(start_time="2008-01-01", end_time="2009-01-01"))
-        date_max = prices['DATE'].max()
+        totalPred = len(preds)
         for i, row in preds.iterrows():
-            val = grade(preds.loc[i], prices, date_max)
-            if val == -1:
-                preds.drop(i, inplace=True)
+            val, date = grade(preds, prices, grades, i)
+            if val != -1:
+                grades.loc[len(grades)] = [row['XCOMPANY'],date,0,row['ESTIMID'],row['ALYSNAM'],val]
             else:
                 preds.set_value(i, 'GRADE', val)
+            xit.progressRatio(len(grades), totalPred, "Pred analysis", 2)
 
-        print(preds)
-        print(prices)
+
+
         analyst_grades = preds[["ESTIMID", "GRADE"]]
-        analyst_grades = analyst_grades.groupby(['ESTIMID']).mean()
+        analyst_grades = grades.groupby(['ESTIMID']).mean()
         print(analyst_grades)
+        print(grades)
 
 

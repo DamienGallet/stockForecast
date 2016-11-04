@@ -25,6 +25,7 @@ def loadPrediction(company):
     """
     path = data_file_main_path+pred_path+company+'.csv'
     data = pd.read_csv(path,parse_dates=[['ACTDATS', 'ACTTIMS']])
+    data['MONTH'] = data.apply (lambda row: date_to_month(row['ACTDATS_ACTTIMS']),axis=1)
     data['XCOMPANY'] = company
     data = cleanColumns(data,[])
     return data
@@ -40,7 +41,8 @@ def loadStockPrice(company):
     data['XCOMPANY'] = company
     data['DATE'] = pd.to_datetime(data['date'],format="%Y%m%d")
     data['MONTH'] = data.apply (lambda row: date_to_month(row['DATE']),axis=1)
-    data.set_index('MONTH',verify_integrity=True)
+    data.set_index(['MONTH'],inplace=True)
+    print(data)
     data = cleanColumns(data,['date'])
     return data
 
