@@ -31,7 +31,7 @@ def getFromCache(company, type):
     path = getCachePath(company, type)
     if os.path.isfile(path):
         print("Get from cache "+path)
-        return pd.read_csv(path)
+        return pd.read_csv(path,encoding=ENCODING_TYPE)
     else:
         return
 

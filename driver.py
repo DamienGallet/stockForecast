@@ -6,8 +6,30 @@ import pandas as pd
 import ploting_utilities
 
 
-companies = [
+companiesA = [
             "IBM",
+            "MSFT",
+            "INTC",
+            "XOM",
+            "WMT",
+            "NYX",
+            "ABX",
+            "BA",
+            "KO",
+            "DD",
+            "MCD",
+            "GS"]
+
+companies = ['SNDK',
+'DVN',
+'INTC',
+'SLB',
+'QCOM',
+'CLR',
+'JPM',
+'BP',
+
+"IBM",
             "MSFT",
             "INTC",
             "XOM",
@@ -60,6 +82,10 @@ def getRealPrice(pred, prices):
 def gauss_function(x, a, x0, sigma):
     return a*np.exp(-(x-x0)**2/(2*sigma**2))
 
+def indicatrice_function(current, expected):
+    if current == expected:
+        return 1
+    return 0.01
 
 def price_forecast(grades, company):
     forecast = pd.DataFrame(columns=['COMPANY','MONTH','FORECAST','GRADE','BEST_FORECAST','STRAIGHT_FORECAST'])
@@ -81,7 +107,7 @@ def price_forecast(grades, company):
             currentWeight = gauss_function(currentMonth, 1, monthEstimation, 2) * pred['GRADE']
             weightedVal = currentWeight * pred['FORECAST']
 
-            currentWeightB = gauss_function(currentMonth, 1, monthEstimation, 0.5)
+            currentWeightB = indicatrice_function(currentMonth,monthEstimation)
             weightedValB = currentWeightB * pred['FORECAST']
 
             totalWeightMonth += currentWeight
@@ -116,13 +142,19 @@ def price_forecast(grades, company):
 def evaluateForecast(forecast, prices):
     for i, pred in forecast.iterrows():
         xit.progressRatio(i, len(forecast), "Forecast evaluation", 10)
-        priceLine = prices.loc[int(pred['MONTH'])]
+        try:
+            priceLine = prices.loc[int(pred['MONTH'])]
+        except:
+            continue
         if len(priceLine) == 1:
             price = priceLine['PRC']
             forecasted = pred['FORECAST']
             deviation = abs(price - forecasted) / price
             forecast.set_value(i, 'GRADE', deviation)
             forecast.set_value(i, 'OFFSET', price - forecasted)
+
+
+
 
     return forecast
 
@@ -201,14 +233,22 @@ def plotCompany(prices, preds, grades, forecast, company):
     valprice = list(prices['PRC'].values)
     datesprice = list(prices.index.values)
 
-    ploting_utilities.plots2D([datesF, datesprice, datesF, datesF], [forecasts, valprice, bestF, straightF], company)
+    gradeDate = list(grades['MONTH'].values)
+    gradePreds = list(grades['FORECAST'].values)
+    gradeGrades = list(grades['GRADE'].values)
+
+    ploting_utilities.plots2D([datesF, datesprice, datesF, datesF, gradeDate],
+                              [forecasts, valprice, bestF, straightF, gradePreds],
+                              [None,None,None,None,gradeGrades],
+                              [False,False,False,False,True],
+                              company)
 
 
 def main(refresh=False, store=True):
 
     allGrades = None
     for company in companies:
-
+        #try:
         preds = xdl.loadPrediction(company)
         prices = xdl.loadStockPrice(company)
 
@@ -221,6 +261,10 @@ def main(refresh=False, store=True):
         allGrades = getMergedGrades(allGrades, grades)
 
         plotCompany(prices, preds, grades, forecast, company)
+        '''except:
+            print('------------------------------')
+            print('ERROR for the company '+company)
+            print('------------------------------')'''
 
 
     grades_c = allGrades[["ESTIMID", "GRADE"]]
@@ -241,19 +285,21 @@ def test():
     ploting_utilities.plots2D([x1, x2], [y1, y2])
 
 
-def dataSplitter(name="bulked"):
+def dataSplitter(name="bulkedB"):
     preds = xdl.loadPrediction(name, False)
     prices = xdl.loadStockPrice(name, False)
     onlyCompanies = preds[['OFTIC']]
     detectedCompanies = onlyCompanies.groupby(['OFTIC']).groups
 
     for company in detectedCompanies.keys():
+
         maskPred = (preds['OFTIC'] == company)
         maskPrice = (prices['TICKER'] == company)
         predsCompany = preds.loc[maskPred]
         priceCompany = prices.loc[maskPrice]
         xdl.putToFile(company, xdl.DataType.PRED, predsCompany)
         xdl.putToFile(company, xdl.DataType.PRICE, priceCompany)
+
 
 
 
