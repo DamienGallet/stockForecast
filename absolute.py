@@ -125,7 +125,7 @@ def absoluteForecast(company, preds, prices, refresh, store, allGrades):
     return forecast, grades, allGrades
 
 
-def plotCompany(prices, preds, grades, forecast, company):
+def plotAbsolute(prices, preds, grades, forecast, company):
     datesF = list(forecast['MONTH'].values)
     for i in range(len(datesF)):
         datesF[i] = datesF[i]

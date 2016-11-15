@@ -8,6 +8,7 @@ import relative as rel
 from utilities import *
 from absolute import *
 from relative import *
+from shortTerm import *
 
 
 companiesA = [
@@ -29,7 +30,6 @@ companies = ['SNDK',
             'INTC',
             'SLB',
             'QCOM',
-            'CLR',
             'JPM',
             'BP',
             "IBM",
@@ -45,6 +45,7 @@ companies = ['SNDK',
             "MCD",
             "GS"]
 
+companiesV = ['MCD','ABX']
 
 def main(refresh=False, store=True):
 
@@ -54,6 +55,7 @@ def main(refresh=False, store=True):
         preds = xdl.loadPrediction(company)
         prices = xdl.loadStockPrice(company)
 
+        computeAndPlotShort(prices, preds, company)
         '''(forecast, grades, allGrades) = absoluteForecast(company,
                                                          preds,
                                                          prices,
@@ -61,13 +63,13 @@ def main(refresh=False, store=True):
                                                          store,
                                                          allGrades)
 
-        plotAbsolute(prices, preds, grades, forecast, company)'''
+        plotAbsolute(prices, preds, grades, forecast, company)
         companyS = [company]
         (analystGrades, preds, forecastFAll) = relativeForecast(preds, prices,companies)
 
         plotRelative(prices, preds, preds, forecastFAll[company], company)
 
-        '''except:
+        except:
             print('------------------------------')
             print('ERROR for the company '+company)
             print('------------------------------')'''
@@ -78,7 +80,7 @@ def main(refresh=False, store=True):
 
     xdl.putToCache("ALL",xdl.DataType.GRADES,analyst_grades)'''
 
-    print(analystGrades)
+    #print(analystGrades)
     ploting_utilities.pause()
 
 
