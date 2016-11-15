@@ -2,6 +2,7 @@ import dataLoader as xdl
 import interface as xit
 import pandas as pd
 from utilities import *
+import ploting_utilities
 
 def price_forecast(grades, company):
     forecast = pd.DataFrame(columns=['COMPANY','MONTH','FORECAST','GRADE','BEST_FORECAST','STRAIGHT_FORECAST'])
@@ -122,3 +123,25 @@ def absoluteForecast(company, preds, prices, refresh, store, allGrades):
     allGrades = getMergedGrades(allGrades, grades)
 
     return forecast, grades, allGrades
+
+
+def plotCompany(prices, preds, grades, forecast, company):
+    datesF = list(forecast['MONTH'].values)
+    for i in range(len(datesF)):
+        datesF[i] = datesF[i]
+
+    forecasts = list(forecast['FORECAST'].values)
+    bestF = list(forecast['BEST_FORECAST'].values)
+    straightF = list(forecast['STRAIGHT_FORECAST'].values)
+    valprice = list(prices['PRC'].values)
+    datesprice = list(prices.index.values)
+
+    gradeDate = list(grades['MONTH'].values)
+    gradePreds = list(grades['FORECAST'].values)
+    gradeGrades = list(grades['GRADE'].values)
+
+    ploting_utilities.plots2D([datesF, datesprice, datesF, datesF, gradeDate],
+                              [forecasts, valprice, bestF, straightF, gradePreds],
+                              [None,None,None,None,gradeGrades],
+                              [False,False,False,False,True],
+                              company)

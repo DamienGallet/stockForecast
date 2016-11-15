@@ -7,6 +7,7 @@ import ploting_utilities
 import relative as rel
 from utilities import *
 from absolute import *
+from relative import *
 
 
 companiesA = [
@@ -45,28 +46,6 @@ companies = ['SNDK',
             "GS"]
 
 
-def plotCompany(prices, preds, grades, forecast, company):
-    datesF = list(forecast['MONTH'].values)
-    for i in range(len(datesF)):
-        datesF[i] = datesF[i]
-
-    forecasts = list(forecast['FORECAST'].values)
-    bestF = list(forecast['BEST_FORECAST'].values)
-    straightF = list(forecast['STRAIGHT_FORECAST'].values)
-    valprice = list(prices['PRC'].values)
-    datesprice = list(prices.index.values)
-
-    gradeDate = list(grades['MONTH'].values)
-    gradePreds = list(grades['FORECAST'].values)
-    gradeGrades = list(grades['GRADE'].values)
-
-    ploting_utilities.plots2D([datesF, datesprice, datesF, datesF, gradeDate],
-                              [forecasts, valprice, bestF, straightF, gradePreds],
-                              [None,None,None,None,gradeGrades],
-                              [False,False,False,False,True],
-                              company)
-
-
 def main(refresh=False, store=True):
 
     allGrades = None
@@ -80,10 +59,14 @@ def main(refresh=False, store=True):
                                                          prices,
                                                          refresh,
                                                          store,
-                                                         allGrades)'''
+                                                         allGrades)
 
+        plotAbsolute(prices, preds, grades, forecast, company)'''
+        companyS = [company]
+        (analystGrades, preds, forecastFAll) = relativeForecast(preds, prices,companies)
 
-        plotCompany(prices, preds, grades, forecast, company)
+        plotRelative(prices, preds, preds, forecastFAll[company], company)
+
         '''except:
             print('------------------------------')
             print('ERROR for the company '+company)
@@ -93,9 +76,9 @@ def main(refresh=False, store=True):
     '''grades_c = allGrades[["ESTIMID", "GRADE"]]
     analyst_grades = grades_c.groupby(['ESTIMID']).agg(['mean', 'count', 'std'])
 
-    xdl.putToCache("ALL",xdl.DataType.GRADES,analyst_grades)
+    xdl.putToCache("ALL",xdl.DataType.GRADES,analyst_grades)'''
 
-    print(analyst_grades)'''
+    print(analystGrades)
     ploting_utilities.pause()
 
 
