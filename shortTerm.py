@@ -5,6 +5,7 @@ from utilities import *
 import interface as xit
 import ploting_utilities
 from inTimeRating import *
+from functionComparaison import *
 import math
 
 MONTH_BEG = 1150
@@ -181,5 +182,6 @@ def plotShortTerm(prices, forecast,company):
 
 def computeAndPlotShort(prices, preds, company):
     forecast = shortForecast(prices, preds, company)
-    plotShortTerm(prices,forecast,company)
+    score = evaluateForecast(forecast,prices)
+    plotShortTerm(prices,forecast,company+' '+str(score))
 
