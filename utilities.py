@@ -44,6 +44,12 @@ def gauss_function(x, a, x0, sigma):
     return a*np.exp(-(x-x0)**2/(2*sigma**2))
 
 
+def limitValue(value, minA, maxA):
+        value = max(minA, value)
+        value = min(maxA, value)
+        return value
+
+
 def getPriceFromHorizon(init_date, horizon, prices):
     start_date = init_date + timedelta(days=horizon*30-31)
     end_date = init_date + timedelta(days=horizon*30)

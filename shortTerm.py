@@ -4,6 +4,7 @@ import driver as drv
 from utilities import *
 import interface as xit
 import ploting_utilities
+from inTimeRating import *
 import math
 
 MONTH_BEG = 1150
@@ -27,11 +28,37 @@ def getPriceOfDate(prices, monthBeg, monthEnd, company):
     except:
         return 0
 
+def forecastFunc(preds,prices,analystGrades,month,company):
+
+    finalValue = 0
+    finalWeight = 0
+    for i, pred in preds.iterrows():
+        analystGrade = getAnalystGrade(analystGrades,pred['ESTIMID'])
+        timeOffset = abs(pred['MONTH'] - month)
+
+        (value, weight) = computePrediction(pred,
+                                            analystGrade,
+                                            timeOffset)
+
+        finalValue += value*weight
+        finalWeight += weight
+
+    if finalWeight == 0:
+        return None
+
+    return finalValue/finalWeight
+
 
 def shortForecast(prices, predsP, company):
 
     forecast = pd.DataFrame(columns=['MONTH','VARIATION','FORECAST','STD'],
                             index=['MONTH'])
+
+    analystGrades = pd.DataFrame(columns=['ESTIMID','ALYSNAM','GRADES','GRADE','DATES'])
+    analystGrades.set_index('ESTIMID',inplace=True)
+    analystGrades.fillna(value=0)
+    analystGrades[['GRADES','DATES']].astype(object)
+
 
     # month is the month of the forecast
     for month in range(MONTH_BEG,MONTH_END):
@@ -49,6 +76,9 @@ def shortForecast(prices, predsP, company):
         forecastV = price + variation
 
         forecast.loc[month] = [month,variation,forecastV,standardDeviation]
+
+        #(analystGrades, preds) = updateGrades(analystGrades, preds, prices, month, company)
+
     forecast.fillna(0)
     return forecast
 
@@ -61,14 +91,23 @@ def plotShortTerm(prices, forecast,company):
     valuesF = list(forecast['FORECAST'].values)[1:]
     valuesP = list(prices['PRC'].values)
 
-    variation = list(forecast['VARIATION'].values)
+    variationP = list(forecast['STD'].values)
+    variationP = np.nan_to_num(variationP)
+    variation = [-val for val in variationP]
+    print(variation)
+    minC = min(variation)
+    maxC = max(variation)
+
+    print(variation)
     print(forecast)
 
     ploting_utilities.plots2D([datesP,datesF],
                               [valuesP,valuesF],
                               [None,variation],
                               [False,True],
-                              company)
+                              company,
+                              minC,
+                              maxC)
 
 
 def computeAndPlotShort(prices, preds, company):
