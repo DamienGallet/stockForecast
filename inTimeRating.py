@@ -64,7 +64,7 @@ def getPredsForDate(preds, monthBeg, monthEnd, company):
 def computePrediction(pred, analystGrade, timeOffset):
 
     value = pred['VALUE']
-    weight = analystGrade
+    weight = pow(analystGrade,3)
     return value, weight
 
 

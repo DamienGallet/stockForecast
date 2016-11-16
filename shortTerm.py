@@ -73,14 +73,83 @@ def shortForecast(prices, predsP, company):
         mean = preds['VALUE'].mean()
 
         variation = mean-price
-        forecastV = price + variation
+        forecastV = forecastFunc(preds,prices,analystGrades,month,company)
+        if forecastV is None:
+            try:
+                forecastV = forecast.loc[month-1]['FORECAST'].values
+            except:
+                forecastV = 0
 
-        forecast.loc[month] = [month,variation,forecastV,standardDeviation]
+        #print('Delta forecast mean : '+str(forecastV-mean)+' | Mean : '+str(mean))
+        if standardDeviation is None:
+            standardDeviation = 0
 
-        #(analystGrades, preds) = updateGrades(analystGrades, preds, prices, month, company)
+        try:
+            previousForecast = forecast.loc[month-1]['FORECAST'].values
+        except:
+            previousForecast = 0
+        if previousForecast is not None and previousForecast != 0:
+            deltaForecast = forecastV - previousForecast
+            forecastV = price + deltaForecast
+
+        #forecast.loc[month] = [month,variation,forecastV,standardDeviation]
+        forecast.set_value(month,'MONTH',month)
+        forecast.set_value(month,'VARIATION',variation)
+        forecast.set_value(month,'FORECAST',forecastV)
+        forecast.set_value(month,'STD',standardDeviation)
+
+
+        (analystGrades, preds) = updateGradesB(analystGrades, preds, price, month, company)
 
     forecast.fillna(0)
     return forecast
+
+
+def updateGradesB(analystGrades, preds, price, month, company):
+
+    for i, pred in preds.iterrows():
+        # This part should be behind the try except
+        newData = absoluteGradeFun(pred['VALUE'],price)
+
+        analyst = pred['ESTIMID']
+        exists = True
+        try:
+            analystData = analystGrades.loc[analyst]
+            oldGrades = analystData['GRADES']
+            oldDates = analystData['DATES']
+            oldGrade = analystData['GRADE']
+            alysnam = analystData['ALYSNAM']
+        except:
+            oldGrades, oldDates = initAnalystGradeData()
+            oldGrade = DEFAULT_GRADE
+            alysnam = pred['ALYSNAM']
+            exists = False
+            if pd.isnull(pred['ALYSNAM']):
+                alysnam = 'UNKNOWN'
+
+
+
+        if newData == -1:
+            continue
+
+        (newGrade, newGrades, newDates) = getAnalystGradeData(  newData,
+                                                                month,
+                                                                oldGrades,
+                                                                oldDates,
+                                                                oldGrade)
+        if not exists:
+            analystGrades.loc[analyst] = [alysnam,
+                                          newGrades,
+                                          newGrade,
+                                          newDates]
+        else:
+            analystGrades.set_value(analyst, 'GRADES', newGrades)
+            analystGrades.set_value(analyst, 'DATES', newDates)
+
+        preds.set_value(i, 'GRADE', newGrade)
+
+    return analystGrades, preds
+
 
 
 def plotShortTerm(prices, forecast,company):

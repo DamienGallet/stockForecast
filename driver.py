@@ -25,7 +25,7 @@ companiesA = [
             "MCD",
             "GS"]
 
-companies = ['SNDK',
+companiesS = ['SNDK',
             'DVN',
             'INTC',
             'SLB',
@@ -45,7 +45,7 @@ companies = ['SNDK',
             "MCD",
             "GS"]
 
-companiesS = ['MCD','ABX']
+companies = ['SNDK','DVN','INTC','IBM','MSFT','MCD','ABX']
 
 def main(refresh=False, store=True):
 

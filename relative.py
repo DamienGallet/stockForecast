@@ -7,13 +7,8 @@ import ploting_utilities
 import math
 from inTimeRating import *
 
-
-
 MONTH_BEG = 1150
 MONTH_END = 1450
-
-
-
 
 
 def relativeForecast(preds, prices,companies):
