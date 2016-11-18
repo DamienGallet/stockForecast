@@ -40,6 +40,24 @@ def getRealPrice(pred, prices):
     return goodLine['PRC'].item(), forecastMonth
 
 
+def getPrice(prices, month):
+
+    try:
+        line = prices.loc[month]
+    except:
+        return -1, 0
+
+    if len(line) == 0:
+        return -1,0
+    else:
+        goodLine = line
+
+    try:
+        return goodLine['PRC'].item()
+    except:
+        return -1, 0
+
+
 def gauss_function(x, a, x0, sigma):
     return a*np.exp(-(x-x0)**2/(2*sigma**2))
 

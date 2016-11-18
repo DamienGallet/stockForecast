@@ -16,13 +16,14 @@ def evaluateForecast(forecast, prices):
             pass
 
         try:
-            priceLine = prices.loc[int(pred['MONTH'])]
+            priceLine = prices.loc[i]
+            #priceLine = prices.loc[int(pred['MONTH'])]
             price = priceLine['PRC']
         except:
             continue
 
         forecasted = pred['FORECAST']
-        if forecasted == 0:
+        if forecasted == 0 or forecasted is None:
             continue
 
         deviation = abs(price - forecasted) / price

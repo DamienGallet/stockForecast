@@ -9,43 +9,45 @@ from utilities import *
 from absolute import *
 from relative import *
 from shortTerm import *
+from errorCorrection import *
 
 
 companiesA = [
-            "IBM",
-            "MSFT",
-            "INTC",
-            "XOM",
-            "WMT",
-            "NYX",
-            "ABX",
-            "BA",
-            "KO",
-            "DD",
-            "MCD",
-            "GS"]
+                "IBM",
+                "MSFT",
+                "INTC",
+                "XOM",
+                "WMT",
+                "NYX",
+                "ABX",
+                "BA",
+                "KO",
+                "DD",
+                "MCD",
+                "GS"]
 
-companiesS = ['SNDK',
-            'DVN',
-            'INTC',
-            'SLB',
-            'QCOM',
-            'JPM',
-            'BP',
-            "IBM",
-            "MSFT",
-            "INTC",
-            "XOM",
-            "WMT",
-            "NYX",
-            "ABX",
-            "BA",
-            "KO",
-            "DD",
-            "MCD",
-            "GS"]
+companiesS = [  'SNDK',
+                'DVN',
+                'INTC',
+                'SLB',
+                'QCOM',
+                'JPM',
+                'BP',
+                "IBM",
+                "MSFT",
+                "INTC",
+                "XOM",
+                "WMT",
+                "NYX",
+                "ABX",
+                "BA",
+                "KO",
+                "DD",
+                "MCD",
+                "GS"]
 
-companies = ['SNDK','DVN','INTC','IBM','MSFT','MCD','ABX']
+companies = ['DVN','SNDK', 'INTC', 'IBM', 'MSFT', 'MCD', 'ABX']
+companiesE = ['DVN']
 
 def main(refresh=False, store=True):
 
@@ -55,32 +57,38 @@ def main(refresh=False, store=True):
         preds = xdl.loadPrediction(company)
         prices = xdl.loadStockPrice(company)
 
-        computeAndPlotShort(prices, preds, company)
+
+        try:
+            computeAndPlotError(prices, preds, company)
+        except:
+            print('------------------------------')
+            print('ERROR for the company '+company)
+            print('------------------------------')
+
         '''(forecast, grades, allGrades) = absoluteForecast(company,
                                                          preds,
                                                          prices,
                                                          refresh,
                                                          store,
                                                          allGrades)
-
-        plotAbsolute(prices, preds, grades, forecast, company)
+        score = evaluateForecast(forecast,prices)
+        plotAbsolute(prices, preds, grades, forecast, company+' '+str(score))
         companyS = [company]
         (analystGrades, preds, forecastFAll) = relativeForecast(preds, prices,companies)
+        score = evaluateForecast(forecastFAll[company],prices)
+        plotRelative(prices, preds, preds, forecastFAll[company], company+' '+str(score))
 
-        plotRelative(prices, preds, preds, forecastFAll[company], company)
-
-        except:
-            print('------------------------------')
-            print('ERROR for the company '+company)
-            print('------------------------------')'''
+        '''
 
 
-    '''grades_c = allGrades[["ESTIMID", "GRADE"]]
-    analyst_grades = grades_c.groupby(['ESTIMID']).agg(['mean', 'count', 'std'])
 
-    xdl.putToCache("ALL",xdl.DataType.GRADES,analyst_grades)'''
+        #grades_c = allGrades[["ESTIMID", "GRADE"]]
+    #analyst_grades = grades_c.groupby(['ESTIMID']).agg(['mean', 'count', 'std'])
+
+    #xdl.putToCache("ALL",xdl.DataType.GRADES,analyst_grades)
 
     #print(analystGrades)
+    #print(grades_c)
     ploting_utilities.pause()
 
 
@@ -107,8 +115,6 @@ def dataSplitter(name="bulkedB"):
         priceCompany = prices.loc[maskPrice]
         xdl.putToFile(company, xdl.DataType.PRED, predsCompany)
         xdl.putToFile(company, xdl.DataType.PRICE, priceCompany)
-
-
 
 
 if __name__ == "__main__":

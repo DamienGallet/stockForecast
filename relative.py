@@ -25,7 +25,7 @@ def relativeForecast(preds, prices,companies):
 
     analystGrades = pd.DataFrame(columns=['ESTIMID','ALYSNAM','GRADES','GRADE','DATES'])
     analystGrades.set_index('ESTIMID',inplace=True)
-    analystGrades.fillna(value=0)
+    analystGrades = analystGrades.fillna(value=0)
     analystGrades[['GRADES','DATES']].astype(object)
 
     for company in companies:
@@ -94,7 +94,7 @@ def plotRelative(prices, preds, grades, forecast, company):
     valprice = list(prices['PRC'].values)
     datesprice = list(prices.index.values)
 
-    gradeDate = list(grades['MONTH'].values)
+    gradeDate = [i+12 for i in grades['MONTH'].values]
     gradePreds = list(grades['VALUE'].values)
     gradeGrades = list(grades['GRADE'].values)
 

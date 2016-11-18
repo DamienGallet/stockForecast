@@ -57,7 +57,7 @@ def shortForecast(prices, predsP, company):
 
     analystGrades = pd.DataFrame(columns=['ESTIMID','ALYSNAM','GRADES','GRADE','DATES'])
     analystGrades.set_index('ESTIMID',inplace=True)
-    analystGrades.fillna(value=0)
+    analystGrades = analystGrades.fillna(value=0)
     analystGrades[['GRADES','DATES']].astype(object)
 
 
@@ -102,7 +102,7 @@ def shortForecast(prices, predsP, company):
 
         (analystGrades, preds) = updateGradesB(analystGrades, preds, price, month, company)
 
-    forecast.fillna(0)
+    analystGrades = forecast.fillna(0)
     return forecast
 
 
@@ -161,7 +161,7 @@ def plotShortTerm(prices, forecast,company):
     valuesF = list(forecast['FORECAST'].values)[1:]
     valuesP = list(prices['PRC'].values)
 
-    variationP = list(forecast['STD'].values)
+    variationP = list(forecast['FORECAST'].values)
     variationP = np.nan_to_num(variationP)
     variation = [-val for val in variationP]
     print(variation)
